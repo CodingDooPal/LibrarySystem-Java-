@@ -1,0 +1,437 @@
+import java.util.*;
+import java.io.*;
+
+class LibraryController
+{
+	private LibraryView libraryView;
+	private LibraryManager libraryManager;
+	private UserManager userManager;
+	private final int booksPerPage = 5;
+	private final int maxBorrowBookCount = 3;
+	private int currentPage = 1;
+	private int totalPage = 0;
+
+	LibraryController(LibraryView libraryView, LibraryManager libraryManager,
+			UserManager userManager) {
+		this.libraryView = libraryView;
+		this.libraryManager = libraryManager;
+		this.userManager = userManager;	
+		this.totalPage = carculateTotalPage();
+	}
+	
+	int getCurrentPage() {
+		return this.currentPage;
+	}
+	
+	int getTotalPage() {
+		return this.totalPage;
+	}
+	
+	void displayBookList(int currentPage, int totalPage) {
+		libraryView.printHeader();
+		int num = this.booksPerPage * (currentPage - 1);
+		Vector<Book> bookList = this.libraryManager.getBookList();
+		for(int i = 0; i < this.booksPerPage; ++i) {
+			if(num + i >= bookList.size()) {
+				break;
+			}
+			this.libraryView.printBookName(i + 1, bookList.get(num + i).getBookName());
+		}
+		this.libraryView.printBookListMenu(currentPage, totalPage);
+	}
+	
+	int carculateTotalPage() {
+		int size = this.libraryManager.getBookList().size();
+		if (size % this.booksPerPage == 0) {
+			return size / this.booksPerPage;
+		}
+		return (size / this.booksPerPage) + 1;
+	}
+	
+	void startLibraryMenu(final int userIdx) {
+		this.libraryView.setCurrentViewState(ViewState.Library);
+		this.totalPage = carculateTotalPage();
+		while (true) {
+			this.displayBookList(this.currentPage, this.totalPage);
+			int input = this.libraryView.input();
+			switch (input) {
+			case 1: // 이전 페이지
+			{
+				if (this.currentPage > 1) {
+					--this.currentPage;
+				}
+				else {
+					// 이전 페이지가 없다는 메시지 출력
+					this.libraryView.printNoPage(PageState.Prev);
+				}
+				break;
+			}
+			case 2: // 다음 페이지
+			{
+				if (this.currentPage < this.totalPage) {
+					++this.currentPage;
+				}
+				else {
+					// 다음 페이지가 없다는 메시지 출력
+					this.libraryView.printNoPage(PageState.Next);
+				}
+				break;
+			}
+			case 3: // 원하는 페이지 이동
+			{
+				int inputPage = 0;
+				this.libraryView.printInputpage();
+				inputPage = this.libraryView.input();
+				if (inputPage > 0 && inputPage <= this.totalPage) {
+					this.currentPage = inputPage;
+				}
+				else {
+					// 존재하지 않는 페이지라는 메시지 출력
+					this.libraryView.printNoPage(PageState.None);
+				}
+				break;
+			}
+			case 4: // 도서 선택
+			{
+				int bookIdx = selectBook();
+				int reserveInput = -1;
+				while (reserveInput != 0 && reserveInput != 1) {
+					this.libraryView.printReserveMenu();
+					reserveInput = this.libraryView.input();
+					reserveBook(reserveInput, userIdx, bookIdx);
+				}
+				break;
+			}
+			case 5: // 도서 검색
+			{
+
+				break;
+			}
+			case 0: // 나가기
+			{
+				
+				return;
+			}
+			default:
+			{
+				// 에러 메시지 출력
+				this.libraryView.printInputError();
+				break;
+			}
+			}
+		}
+	}
+	
+	int selectBook() {
+		this.libraryView.printSelectBook();
+		int input = this.libraryView.input();
+		int num = this.libraryManager.getBookList().size();
+		boolean isLastPage = (this.currentPage == this.totalPage);
+		int bookIdx = (this.currentPage - 1) * this.booksPerPage + (input - 1);
+		
+		if(input <= 0 || input > this.booksPerPage) {
+			// 잘못된 입력 에러 메시지
+			this.libraryView.printInputError();
+			return -1;
+		}
+		if (isLastPage && num % this.booksPerPage != 0) {
+			if (input > num % this.booksPerPage) {
+				// 잘못된 입력 에러 메시지
+				this.libraryView.printInputError();
+				return -1;
+			}
+		}
+		
+		Book selectbook = this.libraryManager.getBook(bookIdx);
+		this.libraryView.printBookInfo(selectbook.getBookName(), selectbook.getBookAuthor(),
+			selectbook.getAvailableCount());
+
+		return bookIdx;
+	}
+	
+	void reserveBook(final int input, final int userIdx, final int bookIdx) {
+		switch (input)
+		{
+		case 1: // 대출 예약
+		{
+			Book book = this.libraryManager.getBookList().get(bookIdx);
+
+			// 빌릴 수 있는 책이 없다면
+			if (book.getAvailableCount() == 0) {
+				// 빌릴 수 있는 책이 없습니다. 출력
+				this.libraryView.printNoAvailableBook();
+				break;
+			}
+			// 대출 한도가 초과라면
+			if (this.userManager.getCurrentUser().getBorrowedBookCount() == this.maxBorrowBookCount) {
+				this.libraryView.printMaxBorrowedCount(this.userManager.getCurrentUser().getUserName());
+				break;
+			}
+			// 빌린 유저 리스트에 현재 유저가 있는 지 확인
+			if (this.libraryManager.hasBorrowedBook(userIdx) >= 0) {
+				int borrowIdx = this.libraryManager.hasBorrowedBook(userIdx);
+				Borrow userBorrowList = this.libraryManager.getBorrowList().get(borrowIdx);
+				BorrowBook borrowBook = new BorrowBook(book.getBookName(), book.getBookAuthor());
+				userBorrowList.getBorrowBookList().add(borrowBook);
+			}
+			else {
+				Borrow borrow = new Borrow(book.getBookName(), book.getBookAuthor(), userIdx);
+				this.libraryManager.getBorrowList().add(borrow);
+			}
+			// 해당하는 책의 대출 가능 수를 하나 줄임.
+			book.sumAvailableCount();
+			// 유저의 빌린 책의 수를 하나 늘림.
+			this.userManager.getCurrentUser().addBorrowedBookCount();
+			break;
+		}
+		case 0: // 나가기
+		{
+
+			break;
+		}
+		default:
+		{
+			this.libraryView.printInputError();
+			break;
+		}
+		}
+	}
+	
+	void displayBorrowedBookList() {
+		int borrowListIdx = this.libraryManager.hasBorrowedBook(this.userManager.getCurrentUserIdx());
+		if (borrowListIdx >= 0){
+			Borrow userBorrowedBook = this.libraryManager.getBorrow(borrowListIdx);
+			this.libraryView.printBorrowedBook(userBorrowedBook);
+		}
+		else {
+			this.libraryView.printNoBorrowedBook();
+		}
+	}
+	
+}
+
+class UserController
+{
+	UserController(UserView userView, UserManager userManager,
+		LibraryController libraryController) {
+		this.userView = userView;
+		this.userManager = userManager;
+		this.libraryController = libraryController;
+	}
+	
+	boolean login(final String id, final String pw) {
+		if (this.userManager.login(id, pw)) {
+			return true;
+		}
+		return false;
+	}
+	
+	boolean signUp(final User user) {
+		// ID 중복 여부 확인 추가
+		if (this.userManager.searchUserId(user.getUserId()))
+			return false;
+		return true;
+	}
+	
+	String getName() {
+		String name = this.userManager.getCurrentUser().getUserName();
+		return name;
+	}
+	
+	void startUserMenu() {
+		int input = 0;
+		this.userView.setCurrentViewState(ViewState.User);
+		while(true) {
+			this.userView.printMenu();
+			input = this.userView.input();
+			switch (input) {
+			case 1: // 도서 목록, 검색 및 대출 예약
+			{
+				this.libraryController.startLibraryMenu(this.userManager.getCurrentUserIdx());
+				break;
+			}
+			case 2: // 대출 받은 책 목록 확인
+			{
+				this.libraryController.displayBorrowedBookList();
+				break;
+			}
+			case 3: // 사용자 계정 정보 변경
+			{
+
+				break;
+			}
+			case 0: // 계정 로그아웃
+			{
+				this.userView.printEndMassage();
+				return;
+			}
+			default:
+			{
+				// 올바르지 않은 입력값 에러 출력
+				break;
+			}
+			}
+		}
+	}
+	private	UserView userView;
+	private UserManager userManager;
+	private LibraryController libraryController;
+}
+
+class AdminController
+{
+	AdminController(AdminView adminView, AdminManager adminManager,
+		LibraryController libraryController) {
+		this.adminView = adminView;
+		this.adminManager = adminManager;
+		this.libraryController = libraryController;
+	}
+	
+	boolean login(final String id, final String pw) {
+		if (this.adminManager.login(id, pw)) {
+			return true;
+		}
+		return false;
+	}
+	
+	void startAdminMenu() {
+		int input = 0;
+		this.adminView.setCurrentViewState(ViewState.Admin);
+		while(true) {
+			this.adminView.printMenu();
+			input = this.adminView.input();
+			switch (input) {
+			case 1: // 도서 검색 및 수정
+			{
+
+				break;
+			}
+			case 2: // 도서 추가 및 삭제
+			{
+
+
+				break;
+			}
+			case 3: // 사용자 관리
+			{
+
+				break;
+			}
+			case 4: // 관리자 계정 정보 변경
+			{
+
+				break;
+			}
+			case 0: // 계정 로그아웃
+			{
+				this.adminView.printEndMassage();
+				return;
+			}
+			default:
+			{
+				// 올바르지 않은 입력값 에러 출력
+				break;
+			}
+			}
+		}
+	}
+private
+	AdminView adminView;
+	AdminManager adminManager;
+	LibraryController libraryController;
+}
+
+// 메인 화면에 대한 컨트롤러
+class MainController
+{
+	
+	// main에서 참조로 has-a에 연결된 클래스에 동일한 객체 전달
+	private final MainView mainView = new MainView();
+	private final UserView userView = new UserView();
+	private final UserManager userManager = new UserManager();
+	private final AdminView adminView = new AdminView();
+	private final AdminManager adminManager = new AdminManager();
+	private final LibraryView libraryView = new LibraryView();
+	private final LibraryManager libraryManager = new LibraryManager();
+
+	private final LibraryController libraryController;
+	private final UserController userController;
+	private final AdminController adminController;
+	
+	MainController() {
+		this.libraryController = new LibraryController(libraryView, libraryManager, userManager);
+		this.userController = new UserController(userView, userManager, libraryController);
+		this.adminController = new AdminController(adminView, adminManager, libraryController);
+	}
+
+	void startMainMenu() {
+		int input = 0;
+		testCode(); // 테스트용 유저 및 book 인풋
+		this.mainView.setCurrentViewState(ViewState.Main);
+		while (true) {
+			this.mainView.printMenu();
+			input = this.mainView.input();
+			switch (input) {
+			case 1: // user 로그인
+			{
+				String id = userView.inputId();
+				String pw = userView.inputPw();
+				if (this.userController.login(id, pw)) {
+					this.userView.printLoginSuccess(this.userController.getName());
+				}
+				else {
+					this.userView.printLoginFail();
+					break;
+				}
+				this.userController.startUserMenu();
+				break;
+			}
+			case 2: // admin 로그인
+			{
+				String id = adminView.inputId();
+				String pw = adminView.inputPw();
+				if (this.adminController.login(id, pw)) {
+					this.adminView.printLoginSuccess();
+				}
+				else {
+					this.adminView.printLoginFail();
+					break;
+				}
+				// AdminController 실행 추가
+				//this.adminController.startAdminMenu();
+				break;
+			}
+			case 3: // 회원가입
+			{
+				User user = this.mainView.inputSignUp();
+				// UserManager 직접 호출x, UserController 호출 후 사용하도록 변경
+				if (this.userController.signUp(user)) {
+					this.userView.printSignUpSuccess();
+				}
+				else {
+					this.userView.printSignUpFail();
+				}
+				break;
+			}
+			case 0:
+			{
+				this.mainView.printEndMassage();
+				return;
+			}
+			default:
+			{
+				// 올바르지 않은 입력값 에러 출력
+				break;
+			}
+			}
+		}
+	}
+	
+	void testCode() {
+		User user = new User("bear7325", "park1130!!", "박종혁", 20223668);
+		this.userManager.insertNewUser(user);
+		for (int i = 0; i < 52; ++i) {
+				this.libraryManager.insertNewBook(new Book("test book", "jpark", 1));
+		}
+	}
+}

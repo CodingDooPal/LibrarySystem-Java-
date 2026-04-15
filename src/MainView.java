@@ -56,6 +56,12 @@ public class MainView {
 		return num;
 	}
 	
+	String inputStr() {
+		System.out.print(">> ");
+		String str = scanner.nextLine();
+		return str;
+	}
+	
 	void printInputError() {
 		System.out.println("잘못된 입력입니다.");
 	}
@@ -116,6 +122,48 @@ class UserView extends MainView
 	
 	void printSignUpFail() {
 		System.out.println("회원가입에 실패했습니다.");
+	}
+	
+	void printUserAccountModify() {
+		System.out.println("수정할 정보를 선택하세요.");
+		System.out.println("1. ID 변경");
+		System.out.println("2. Password 변경");
+		System.out.println("3. 이름 변경");
+		System.out.println("4. 학번 변경");
+	}
+	
+	void printModify(int num) {
+		switch(num) {
+		case 1:
+			System.out.println("변경할 ID를 입력하세요.");
+			break;
+		case 2:
+			System.out.println("변경할 Password를 입력하세요.");
+			break;
+		case 3: 
+			System.out.println("변경할 이름을 입력하세요.");
+			break;
+		case 4:
+			System.out.println("변경할 학번을 입력하세요.");
+			break;
+		}
+	}
+	
+	void printModifySuccess(int num) {
+		switch(num) {
+		case 1:
+			System.out.println("Id가 변경되었습니다!");
+			break;
+		case 2:
+			System.out.println("Password가 변경되었습니다!");
+			break;
+		case 3: 
+			System.out.println("이름이 변경되었습니다!");
+			break;
+		case 4:
+			System.out.println("학번이 변경되었습니다!");
+			break;
+		}
 	}
 	
 	@Override
@@ -226,7 +274,26 @@ class LibraryView extends MainView
 		}
 	}
 	
+	void printBookInfo(Vector<Book> bookList) {
+		int num = 1;
+		for(Book book : bookList) {
+			System.out.println(num + "번째 책");
+			System.out.println("책 이름: " + book.getBookName());
+			System.out.println("책 저자: " + book.getBookAuthor());
+			System.out.println("====================");
+			++num;
+		}
+	}
+	
 	void printNoBorrowedBook() {
 		System.out.println("현재 대출받은 책이 없습니다.");
+	}
+	
+	void printSearchBook() {
+		System.out.println("검색할 책의 이름을 입력하세요.");
+	}
+	
+	void printNotFoundBook() {
+		System.out.println("해당 제목의 책을 찾을 수 없습니다.");
 	}
 }

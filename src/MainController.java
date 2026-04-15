@@ -94,11 +94,18 @@ class LibraryController
 			case 4: // 도서 선택
 			{
 				int bookIdx = selectBook();
-				int reserveInput = -1;
-				while (reserveInput != 0 && reserveInput != 1) {
-					this.libraryView.printReserveMenu();
-					reserveInput = this.libraryView.input();
-					reserveBook(reserveInput, userIdx, bookIdx);
+				int userInput = -1;
+				while (userInput != 0 && userInput != 1) {
+					if(userIdx == -1) {
+						this.libraryView.printModifyBook();
+						userInput = this.libraryView.input();
+						modifyBook(userInput, bookIdx);
+					}
+					else {
+						this.libraryView.printReserveBook();
+						userInput = this.libraryView.input();
+						reserveBook(userInput, userIdx, bookIdx);
+					}
 				}
 				break;
 			}
@@ -184,12 +191,12 @@ class LibraryController
 			// 빌린 유저 리스트에 현재 유저가 있는 지 확인
 			if (this.libraryManager.hasBorrowedBook(userIdx) >= 0) {
 				int borrowIdx = this.libraryManager.hasBorrowedBook(userIdx);
-				Borrow userBorrowList = this.libraryManager.getBorrowList().get(borrowIdx);
-				BorrowBook borrowBook = new BorrowBook(book.getBookName(), book.getBookAuthor());
-				userBorrowList.getBorrowBookList().add(borrowBook);
+				Borrow userBorrowed = this.libraryManager.getBorrowList().get(borrowIdx);
+				userBorrowed.getBorrowBookList().add(book);
+				
 			}
 			else {
-				Borrow borrow = new Borrow(book.getBookName(), book.getBookAuthor(), userIdx);
+				Borrow borrow = new Borrow(book, userIdx);
 				this.libraryManager.getBorrowList().add(borrow);
 			}
 			// 해당하는 책의 대출 가능 수를 하나 줄임.
@@ -215,7 +222,7 @@ class LibraryController
 		int borrowListIdx = this.libraryManager.hasBorrowedBook(this.userManager.getCurrentUserIdx());
 		if (borrowListIdx >= 0){
 			Borrow userBorrowedBook = this.libraryManager.getBorrow(borrowListIdx);
-			this.libraryView.printBorrowedBook(userBorrowedBook);
+			this.libraryView.printBookInfo(userBorrowedBook.getBorrowBookList());
 		}
 		else {
 			this.libraryView.printNoBorrowedBook();
@@ -229,10 +236,55 @@ class LibraryController
 				searchBookList.add(book);
 			}
 		}
-		
 		return searchBookList;		
 	}
 	
+	void modifyBook(int num, int bookIdx) {
+		Book book = this.libraryManager.getBookList().get(bookIdx);
+		switch (num) {
+		case 1:
+			int userInput = -1;
+			while(userInput != 0) {
+				this.libraryView.printModifyBookMenu();
+				userInput = this.libraryView.input();
+				switch(userInput) {
+				case 1: {
+					String inputStr = this.libraryView.inputStr();
+					book.setBookName(inputStr);
+					break;
+				}
+				case 2: {
+					String inputStr = this.libraryView.inputStr();
+					book.setBookAuthor(inputStr);
+					break;
+				}
+				case 3: { 
+					int inputNum = this.libraryView.input();
+					book.setAvailableCount(inputNum);
+					break;
+				}
+				case 0: {
+					// 이전 화면으로 돌아갑니다.
+					break;
+				}
+				default: {
+					// 유효하지 않은 입력 에러 출력
+					this.libraryView.printInputError();
+					break;
+				}
+				}
+			}
+			
+			break;
+		case 0:
+			// 이전 화면으로 돌아갑니다.
+			break;
+		default:
+			// 유효하지 않은 입력 에러 출력
+			this.libraryView.printInputError();
+			break;
+		}
+	}
 }
 
 class UserController
@@ -347,7 +399,7 @@ class AdminController
 			switch (input) {
 			case 1: // 도서 검색 및 수정
 			{
-
+				this.libraryController.startLibraryMenu(-1);
 				break;
 			}
 			case 2: // 도서 추가 및 삭제
@@ -388,7 +440,6 @@ private
 // 메인 화면에 대한 컨트롤러
 class MainController
 {
-	
 	// main에서 참조로 has-a에 연결된 클래스에 동일한 객체 전달
 	private final MainView mainView = new MainView();
 	private final UserView userView = new UserView();
@@ -442,7 +493,7 @@ class MainController
 					break;
 				}
 				// AdminController 실행 추가
-				//this.adminController.startAdminMenu();
+				this.adminController.startAdminMenu();
 				break;
 			}
 			case 3: // 회원가입
@@ -465,6 +516,7 @@ class MainController
 			default:
 			{
 				// 올바르지 않은 입력값 에러 출력
+				this.mainView.printInputError();
 				break;
 			}
 			}
@@ -472,7 +524,7 @@ class MainController
 	}
 	
 	void testCode() {
-		User user = new User("userid", "password", "박종혁", 20223668);
+		User user = new User("user", "password", "박종혁", 20223668);
 		this.userManager.insertNewUser(user);
 		for (int i = 0; i < 52; ++i) {
 				this.libraryManager.insertNewBook(new Book("test book " + Integer.toString(i + 1), "jpark", 1));

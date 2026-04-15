@@ -47,13 +47,18 @@ public class MainView {
 	}
 	
 	void printEndMassage() {
+		printSystemNotice();
 		System.out.println("프로그램 종료");
 	}
 
 	int input() {
 		System.out.print(">> ");
-		int num = Integer.parseInt(scanner.nextLine());
-		return num;
+		try {
+			int num = Integer.parseInt(scanner.nextLine());
+			return num;
+		} catch (NumberFormatException e) {
+			return -1;
+		}
 	}
 	
 	String inputStr() {
@@ -63,6 +68,7 @@ public class MainView {
 	}
 	
 	void printInputError() {
+		printSystemNotice();
 		System.out.println("잘못된 입력입니다.");
 	}
 
@@ -92,7 +98,12 @@ public class MainView {
 	}
 	
 	void printLoginFail() {
+		printSystemNotice();
 		System.out.println("일치하는 정보가 없습니다. id와 password를 다시 입력해주세요.");
+	}
+	
+	void printSystemNotice() {
+		System.out.println("\n\n***System Notice***");
 	}
 
 	// 인터페이스가 현재 Main, User, Admin 중 어느 것인지 알려주는 녀석
@@ -113,18 +124,22 @@ class UserView extends MainView
 	}
 
 	void printLoginSuccess(final String name) {
+		printSystemNotice();
 		System.out.println(name + "님 환영합니다!");
 	}
 	
 	void printSignUpSuccess() {
+		printSystemNotice();
 		System.out.println("회원가입에 성공했습니다.");
 	}
 	
 	void printSignUpFail() {
+		printSystemNotice();
 		System.out.println("회원가입에 실패했습니다.");
 	}
 	
 	void printUserAccountModify() {
+		printSystemNotice();
 		System.out.println("수정할 정보를 선택하세요.");
 		System.out.println("1. ID 변경");
 		System.out.println("2. Password 변경");
@@ -133,6 +148,7 @@ class UserView extends MainView
 	}
 	
 	void printModify(int num) {
+		printSystemNotice();
 		switch(num) {
 		case 1:
 			System.out.println("변경할 ID를 입력하세요.");
@@ -150,6 +166,7 @@ class UserView extends MainView
 	}
 	
 	void printModifySuccess(int num) {
+		printSystemNotice();
 		switch(num) {
 		case 1:
 			System.out.println("Id가 변경되었습니다!");
@@ -186,6 +203,7 @@ class AdminView extends MainView
 	}
 	
 	void printLoginSuccess() {
+		printSystemNotice();
 		System.out.println("관리자님 환영합니다!");
 	}
 	
@@ -219,10 +237,12 @@ class LibraryView extends MainView
 	}
 	
 	void printInputpage() {
+		printSystemNotice();
 		System.out.println("원하는 페이지를 입력하세요.");
 	}
 	
 	void printSelectBook() {
+		printSystemNotice();
 		System.out.println("원하는 책의 번호를 입력하세요.");
 	}
 	
@@ -232,13 +252,14 @@ class LibraryView extends MainView
 		System.out.println("남은 권수: " + count);
 	}
 	
-	void printReserveMenu() {
+	void printReserveBook() {
 		System.out.println("====================");
 		System.out.println("1. 대출 예약하기");
 		System.out.println("0. 돌아가기");
 	}
 
 	void printNoPage(PageState pageState) {
+		printSystemNotice();
 		switch(pageState) {
 		case PageState.Prev:
 			System.out.println("이전 페이지가 없습니다.");
@@ -256,28 +277,19 @@ class LibraryView extends MainView
 	}
 	
 	void printNoAvailableBook() {
+		printSystemNotice();
 		System.out.println("현재 예약 가능한 책이 없습니다.");
 	}
 	
 	void printMaxBorrowedCount(final String name) {
+		printSystemNotice();
 		System.out.println(name + "님의 대출 한도가 초과되어 대출이 불가능합니다.");
-	}
-	
-	void printBorrowedBook(Borrow borrowedBookList) {
-		int num = 1;
-		for(BorrowBook borrowBook : borrowedBookList.getBorrowBookList()) {
-			System.out.println(num + "번째 책");
-			System.out.println("책 이름: " + borrowBook.bookName);
-			System.out.println("책 저자: " + borrowBook.bookAuthor);
-			System.out.println("====================");
-			++num;
-		}
 	}
 	
 	void printBookInfo(Vector<Book> bookList) {
 		int num = 1;
 		for(Book book : bookList) {
-			System.out.println(num + "번째 책");
+			System.out.println("\n" + num + "번째 책");
 			System.out.println("책 이름: " + book.getBookName());
 			System.out.println("책 저자: " + book.getBookAuthor());
 			System.out.println("====================");
@@ -286,14 +298,31 @@ class LibraryView extends MainView
 	}
 	
 	void printNoBorrowedBook() {
+		printSystemNotice();
 		System.out.println("현재 대출받은 책이 없습니다.");
 	}
 	
 	void printSearchBook() {
+		printSystemNotice();
 		System.out.println("검색할 책의 이름을 입력하세요.");
 	}
 	
 	void printNotFoundBook() {
+		printSystemNotice();
 		System.out.println("해당 제목의 책을 찾을 수 없습니다.");
+	}
+	
+	void printModifyBook() {
+		System.out.println("====================");
+		System.out.println("1. 도서 정보 변경하기");
+		System.out.println("0. 돌아가기");
+	}
+	
+	void printModifyBookMenu() {
+		System.out.println("수정할 정보를 선택하세요.");
+		System.out.println("1. 책 이름 변경하기");
+		System.out.println("2. 책 저자 변경하기");
+		System.out.println("3. 책 수량 변경하기");
+		System.out.println("0. 돌아가기");
 	}
 }

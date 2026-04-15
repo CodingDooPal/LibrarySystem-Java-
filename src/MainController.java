@@ -104,7 +104,21 @@ class LibraryController
 			}
 			case 5: // 도서 검색
 			{
-
+				// 도서 검색 view 띄우고 string input 받는다.
+				this.libraryView.printSearchBook();
+				String searchBookName = this.libraryView.inputStr();
+				Vector<Book> searchBookList = searchBook(searchBookName);
+				// 객체를 벡터로 받아서 empty이면 찾는 책이 없고
+				// 데이터가 1이상이면 출력
+				if(searchBookList.isEmpty()) {
+					// 해당 제목의 책이 없다
+					this.libraryView.printNotFoundBook();
+				}
+				else {
+					// 찾은 책 목록 출력
+					this.libraryView.printBookInfo(searchBookList);
+				}
+				
 				break;
 			}
 			case 0: // 나가기
@@ -208,6 +222,17 @@ class LibraryController
 		}
 	}
 	
+	Vector<Book> searchBook(String searchBookName) {
+		Vector<Book> searchBookList = new Vector<>();
+		for(Book book : this.libraryManager.getBookList()) {
+			if(book.getBookName().equals(searchBookName)) {
+				searchBookList.add(book);
+			}
+		}
+		
+		return searchBookList;		
+	}
+	
 }
 
 class UserController
@@ -257,7 +282,26 @@ class UserController
 			}
 			case 3: // 사용자 계정 정보 변경
 			{
-
+				this.userView.printUserAccountModify();
+				int num = this.userView.input();
+				switch (num) {
+				case 1: // id, pw, 이름 변경
+				case 2:
+				case 3:
+					this.userView.printModify(num);
+					String inputId = this.userView.inputStr();
+					this.userManager.modifyUserInfo(inputId, num);
+					this.userView.printModifySuccess(num);
+					break;
+				case 4: // 학번 변경
+					this.userView.printModify(num);
+					break;
+				default:
+					// 에러코드 출력
+					this.userView.printInputError();
+					break;
+				}
+				
 				break;
 			}
 			case 0: // 계정 로그아웃
@@ -428,10 +472,10 @@ class MainController
 	}
 	
 	void testCode() {
-		User user = new User("bear7325", "park1130!!", "박종혁", 20223668);
+		User user = new User("userid", "password", "박종혁", 20223668);
 		this.userManager.insertNewUser(user);
 		for (int i = 0; i < 52; ++i) {
-				this.libraryManager.insertNewBook(new Book("test book", "jpark", 1));
+				this.libraryManager.insertNewBook(new Book("test book " + Integer.toString(i + 1), "jpark", 1));
 		}
 	}
 }

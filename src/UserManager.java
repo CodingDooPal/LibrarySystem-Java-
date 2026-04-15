@@ -9,6 +9,7 @@ class User {
 		this.name = name;
 		this.studentNum = studentNum;
 	}
+	
 	String getUserId() {
 		return this.id;
 	}
@@ -19,6 +20,22 @@ class User {
 	
 	String getUserName() {
 		return this.name;
+	}
+	
+	void setUserId(String id) {
+		this.id = id;
+	}
+	
+	void setUserPw(String pw) {
+		this.pw = pw;
+	}
+	
+	void setUserName(String name) {
+		this.name = name;
+	}
+	
+	void setUserStudentNum(int num) {
+		this.studentNum = num;
 	}
 	
 	int getBorrowedBookCount() {
@@ -86,6 +103,24 @@ public class UserManager {
 	
 	void insertNewUser(User user) {
 		this.userInfoList.add(user);
+	}
+	
+	void modifyUserInfo(String input, int num) {
+		switch(num) {
+		case 1:
+			userInfoList.get(currentUserIdx).setUserId(input);
+			break;
+		case 2: 
+			userInfoList.get(currentUserIdx).setUserPw(input);
+			break;
+		case 3:
+			userInfoList.get(currentUserIdx).setUserName(input);
+			break;
+		}
+	}
+	
+	void modifyUserInfo(int input, int num) {
+		userInfoList.get(currentUserIdx).setUserStudentNum(num);
 	}
 	
 	private Vector<User> userInfoList = new Vector<>();

@@ -94,6 +94,10 @@ class LibraryController
 			case 4: // 도서 선택
 			{
 				int bookIdx = selectBook();
+				if(bookIdx == -1) {
+					// 존재하지 않는 책 오류
+					break;
+				}
 				int userInput = -1;
 				while (userInput != 0 && userInput != 1) {
 					if(userIdx == -1) {
@@ -342,12 +346,15 @@ class UserController
 				case 2:
 				case 3:
 					this.userView.printModify(num);
-					String inputId = this.userView.inputStr();
-					this.userManager.modifyUserInfo(inputId, num);
+					String inputStr = this.userView.inputStr();
+					this.userManager.modifyUserInfo(inputStr, num);
 					this.userView.printModifySuccess(num);
 					break;
 				case 4: // 학번 변경
 					this.userView.printModify(num);
+					int inputNum = this.userView.input();
+					this.userManager.modifyUserInfo(inputNum, num);
+					this.userView.printModifySuccess(num);
 					break;
 				default:
 					// 에러코드 출력

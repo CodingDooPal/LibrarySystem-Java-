@@ -67,8 +67,9 @@ class Admin
 		return this.pw;		
 	}
 	
-	private String id = "bear7325";
-	private String pw = "park1130!!"; // 나중에 숨기거나 암호화 가능할지 생각해봐야함
+	private String id = "admin";
+	private String pw = "password"; // 나중에 숨기거나 암호화 가능할지 생각해봐야함
+	
 };
 
 public class UserManager {
@@ -130,10 +131,10 @@ public class UserManager {
 class AdminManager
 {
 	boolean login(final String id, final String pw) {
-		if(id.equals(admin.getAdminId()) && pw.equals(admin.getAdminId())) {
+		if(id.equals(admin.getAdminId()) && pw.equals(admin.getAdminPw())) {
 			return true;
 		}
-		return true;
+		return false;
 	}
 
 	private	Admin admin = new Admin();

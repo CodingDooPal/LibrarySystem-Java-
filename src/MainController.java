@@ -307,6 +307,7 @@ class UserController
 		// ID 중복 여부 확인 추가
 		if (this.userManager.searchUserId(user.getUserId()))
 			return false;
+		this.userManager.insertNewUser(user);
 		return true;
 	}
 	

@@ -18,6 +18,18 @@ class Book {
 		return this.bookAuthor;
 	}
 	
+	void setBookName(String name) {
+		this.bookName = name;
+	}
+	
+	void setBookAuthor(String author) {
+		this.bookAuthor = author;
+	}
+	
+	void setAvailableCount(int num) {
+		this.availableCount = num;
+	}
+	
 	int getAvailableCount() {
 		return this.availableCount;
 	}
@@ -37,22 +49,11 @@ class Book {
 	//boolean m_isLoaned{ false }; // 대출 가능한 수량이 없으면 true로 변경
 };
 
-class BorrowBook {
-	BorrowBook(final String name, final String author) {
-		this.bookName = name;
-		this.bookAuthor = author;
-	}
-	
-	String bookName;
-	String bookAuthor;
-};
-
 //Borrow 객체(하나의 유저가 빌린 책들 저장)
 class Borrow {
 	Borrow() {}
-	Borrow(final String name, final String author, final int idx) {
-		BorrowBook borrowBook = new BorrowBook(name, author);
-		this.borrowBookList.add(borrowBook);
+	Borrow(Book book, final int idx) {
+		this.borrowBookList.add(book);
 		this.userIdx = idx;
 	}
 	
@@ -60,12 +61,12 @@ class Borrow {
 		return this.userIdx;
 	}
 	
-	Vector<BorrowBook> getBorrowBookList() {
+	Vector<Book> getBorrowBookList() {
 		return this.borrowBookList;
 	}
 	
 	private int userIdx;
-    private Vector<BorrowBook> borrowBookList = new Vector<>();
+    private Vector<Book> borrowBookList = new Vector<>();
 };
 
 //도서 관리

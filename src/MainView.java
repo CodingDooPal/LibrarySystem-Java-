@@ -1,4 +1,3 @@
-package qwer2345;
 import java.io.*;
 import java.util.*;
 

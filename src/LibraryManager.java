@@ -102,6 +102,7 @@ public class LibraryManager {
 		}
 		return -1;
 	}
+	
 	private Vector<Book> bookList = new Vector<>();
 	private Vector<Borrow> borrowList = new Vector<>();
 };

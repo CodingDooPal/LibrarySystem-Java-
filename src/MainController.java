@@ -1,3 +1,5 @@
+package qwer2345;
+
 import java.util.*;
 import java.io.*;
 
@@ -51,6 +53,7 @@ class LibraryController
 	void startLibraryMenu(final int userIdx) {
 		this.libraryView.setCurrentViewState(ViewState.Library);
 		this.totalPage = carculateTotalPage();
+		this.currentPage = 1;
 		while (true) {
 			this.displayBookList(this.currentPage, this.totalPage);
 			int input = this.libraryView.input();
@@ -113,7 +116,7 @@ class LibraryController
 				}
 				break;
 			}
-			case 5: // 도서 검색
+			case 5: // 도서 검색(나중에 몇 페이지에 있는 지도 함께 출력하도록 변경)
 			{
 				// 도서 검색 view 띄우고 string input 받는다.
 				this.libraryView.printSearchBook();
@@ -289,6 +292,66 @@ class LibraryController
 			break;
 		}
 	}
+	
+	// 관리자가 책 추가 또는 삭제
+	void bookInsertOrDelete() {
+		this.libraryView.printBookInsertOrDeleteMenu();
+		int inputNum = this.libraryView.input();
+		switch(inputNum) {
+		case 1:
+		{
+			this.libraryView.printInputBookName();
+			String name = this.libraryView.inputStr();
+			this.libraryView.printInputBookAuthor();
+			String author = this.libraryView.inputStr();
+			this.libraryView.printInputBookAvilableCount();
+			int avilableCount = this.libraryView.input();
+			
+			Book book = new Book(name, author, avilableCount);
+			this.libraryManager.getBookList().add(book);
+			
+			this.libraryView.printSuccessBookInsert();
+			
+			break;
+		}
+		case 2:
+		{
+			// 삭제할 책 이름 입력
+			this.libraryView.printInputBookName();
+			String searchBookName = this.libraryView.inputStr();
+			Vector<Book> searchBookList = searchBook(searchBookName); // bookList 객체는 삭제가 안 됨.
+			// 해결하기 위해서 bookList에 인덱스로 직접 접근해야 함. 따라서 searchBook을 하면서 bookList에 어디에 위치하는지에 대한 index도 함께 추출할
+			// 방법을 생각해야 됨.
+			if(searchBookList.isEmpty()) {
+				// 해당 제목의 책이 없다
+				this.libraryView.printNotFoundBook();
+			}
+			else {
+				// 찾은 책 목록 출력
+				this.libraryView.printBookInfo(searchBookList);
+			}
+			this.libraryView.printSelectBook();
+			// 잘못 진입했을 때를 고려해서 -1을 입력하면 나가도록 설정
+			this.libraryView.printExitDeleteBookMenu();
+			int inputNum2 = this.libraryView.input();
+			if(inputNum2 == -1) {
+				break;
+			}
+			searchBookList.remove(inputNum2 - 1);
+			this.libraryView.printSuccessDeleteBook();
+			
+			break;
+		}
+		case 0:
+		{
+			// 돌아가기
+			break;
+		}
+		default:
+			// 유효하지 않는 입력 에러 출력
+			this.libraryView.printInputError();
+		}
+	}
 }
 
 class UserController
@@ -412,8 +475,7 @@ class AdminController
 			}
 			case 2: // 도서 추가 및 삭제
 			{
-
-
+				this.libraryController.bookInsertOrDelete();
 				break;
 			}
 			case 3: // 사용자 관리

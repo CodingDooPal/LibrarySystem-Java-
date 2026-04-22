@@ -1,3 +1,4 @@
+package qwer2345;
 import java.io.*;
 import java.util.*;
 
@@ -117,7 +118,7 @@ class UserView extends MainView
 	@Override
 	void printMenu() {
 		printHeader();
-		System.out.println("1. 도서 목록 ,검색 및 대출 예약");
+		System.out.println("1. 도서 목록, 검색 및 대출 예약");
 		System.out.println("2. 대출 목록");
 		System.out.println("3. 사용자 계정 정보 변경");
 		System.out.println("0. 계정 로그아웃");
@@ -223,7 +224,7 @@ class LibraryView extends MainView
 	}
 	
 	void printBookName(final int num, final String name) {
-		System.out.println(num + ", " + name);
+		System.out.println(num + ". " + name);
 	}
 	
 	void printBookListMenu(int currentPage, int totalPage) {
@@ -324,5 +325,35 @@ class LibraryView extends MainView
 		System.out.println("2. 책 저자 변경하기");
 		System.out.println("3. 책 수량 변경하기");
 		System.out.println("0. 돌아가기");
+	}
+	
+	void printBookInsertOrDeleteMenu() {
+		System.out.println("\n1. 책 추가하기");
+		System.out.println("2. 책 삭제하기");
+		System.out.println("0. 돌아가기");
+	}
+	
+	void printInputBookName() {
+		System.out.println("책 이름을 입력하세요.");
+	}
+	
+	void printInputBookAuthor() {
+		System.out.println("책 저자를 입력하세요.");
+	}
+	
+	void printInputBookAvilableCount() {
+		System.out.println("이용 가능한 수량을 입력하세요.");
+	}
+	
+	void printSuccessBookInsert() {
+		System.out.println("새로운 책이 추가되었습니다.");
+	}
+	
+	void printExitDeleteBookMenu() {
+		System.out.println("삭제하고 싶지 않거나 삭제할 책 이름을 잘못 입력했을 경우 -1을 입력하세요.");
+	}
+	
+	void printSuccessDeleteBook() {
+		System.out.println("삭제에 성공했습니다.");
 	}
 }
